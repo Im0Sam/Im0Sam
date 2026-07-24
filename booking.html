@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Book a chair — Kungliga Barbershop, Uppsala</title>
+<meta name="description" content="Book your appointment directly with Kungliga Barbershop, Uppsala — pick a service, a time that suits you, and your chair is reserved. No third-party account needed.">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%230b0d13'/%3E%3Cpath d='M12 44h40l-3-20-9 8-8-14-8 14-9-8z' fill='%23c9a227'/%3E%3Crect x='12' y='46' width='40' height='5' rx='2.5' fill='%23c9a227'/%3E%3C/svg%3E">
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body data-theme="deep">
+
+<!-- ══════════ FIXED WEBGL STAGE ══════════ -->
+<canvas id="gl" class="gl-stage" aria-hidden="true"></canvas>
+<div class="vignette" aria-hidden="true"></div>
+<div class="grain" aria-hidden="true"></div>
+
+<!-- ══════════ CUSTOM CURSOR ══════════ -->
+<div class="cursor" id="cursorDot" aria-hidden="true"></div>
+<div class="cursor-ring" id="cursorRing" aria-hidden="true"></div>
+
+<!-- ══════════ HEADER ══════════ -->
+<header class="header is-scrolled" id="header">
+  <a class="header__brand" href="index.html" data-hover>
+    <svg class="header__crown" viewBox="0 0 64 48" aria-hidden="true">
+      <path d="M6 34h52l-4-22-11 10-11-16-11 16-11-10z" fill="currentColor"/>
+      <rect x="6" y="38" width="52" height="4" rx="2" fill="currentColor"/>
+    </svg>
+    <span>KUNGLIGA</span>
+  </a>
+  <nav class="header__nav" aria-label="Primary">
+    <a href="index.html#craft" data-hover>The Craft</a>
+    <a href="index.html#services" data-hover>Services</a>
+    <a href="index.html#visit" data-hover>Visit</a>
+  </nav>
+  <a class="header__cta" href="tel:+46737287393" data-hover>073 – 728 73 93</a>
+</header>
+
+<main id="bookingApp" data-standalone="1">
+<section class="section booking-main">
+  <div class="section__inner">
+    <p class="kicker">Direct booking — no third-party account</p>
+    <h1 class="section__title">Book your<br><span class="serif-italic">chair</span></h1>
+
+    <!-- step indicator -->
+    <ol class="bk-steps" id="bkSteps">
+      <li class="bk-step is-active" data-step="1"><span class="bk-step__num">1</span><span class="bk-step__label">Service</span></li>
+      <li class="bk-step" data-step="2"><span class="bk-step__num">2</span><span class="bk-step__label">Time</span></li>
+      <li class="bk-step" data-step="3"><span class="bk-step__num">3</span><span class="bk-step__label">Details</span></li>
+      <li class="bk-step" data-step="4"><span class="bk-step__num">4</span><span class="bk-step__label">Done</span></li>
+    </ol>
+
+    <!-- ── step 1 · service ── -->
+    <div class="bk-panel is-active" id="panel1">
+      <div class="svc-grid" id="svcGrid" role="radiogroup" aria-label="Choose a service"></div>
+      <div class="bk-actions">
+        <span></span>
+        <button class="btn btn--gold bk-next" id="toStep2" disabled data-hover>Choose a time →</button>
+      </div>
+    </div>
+
+    <!-- ── step 2 · date & time ── -->
+    <div class="bk-panel" id="panel2">
+      <h3 class="bk-subtitle">Pick a day</h3>
+      <div class="day-strip" id="dayStrip" role="radiogroup" aria-label="Choose a day"></div>
+      <h3 class="bk-subtitle" id="slotTitle">Available times</h3>
+      <div class="slot-grid" id="slotGrid" role="radiogroup" aria-label="Choose a time"></div>
+      <p class="bk-note" id="slotNote"></p>
+      <div class="bk-actions">
+        <button class="btn btn--ghost bk-back" data-to="1" data-hover>← Back</button>
+        <button class="btn btn--gold bk-next" id="toStep3" disabled data-hover>Your details →</button>
+      </div>
+    </div>
+
+    <!-- ── step 3 · details ── -->
+    <div class="bk-panel" id="panel3">
+      <div class="bk-detail-grid">
+        <form class="bk-form" id="bkForm" novalidate>
+          <label class="bk-field">
+            <span>Name *</span>
+            <input type="text" id="fName" name="name" autocomplete="name" required placeholder="Your name">
+          </label>
+          <label class="bk-field">
+            <span>Mobile *</span>
+            <input type="tel" id="fPhone" name="phone" autocomplete="tel" required placeholder="07X – XXX XX XX">
+          </label>
+          <label class="bk-field bk-field--wide">
+            <span>Email <em>(optional)</em></span>
+            <input type="email" id="fEmail" name="email" autocomplete="email" placeholder="you@example.com">
+          </label>
+          <label class="bk-field bk-field--wide">
+            <span>Notes <em>(optional)</em></span>
+            <textarea id="fNotes" name="notes" rows="3" placeholder="Fade length, beard wishes, anything we should know…"></textarea>
+          </label>
+          <p class="bk-error" id="formError" role="alert" hidden>Please give us your name and a mobile number so we can confirm.</p>
+        </form>
+        <aside class="glasscard bk-summary" aria-live="polite">
+          <h3>Your booking</h3>
+          <dl class="bk-summary__list">
+            <div><dt>Service</dt><dd id="sumService">—</dd></div>
+            <div><dt>Day</dt><dd id="sumDate">—</dd></div>
+            <div><dt>Time</dt><dd id="sumTime">—</dd></div>
+            <div><dt>Length</dt><dd id="sumDur">—</dd></div>
+            <div><dt>Where</dt><dd>Kungsängsesplanaden 10D</dd></div>
+          </dl>
+        </aside>
+      </div>
+      <div class="bk-actions">
+        <button class="btn btn--ghost bk-back" data-to="2" data-hover>← Back</button>
+        <button class="btn btn--gold" id="confirmBtn" data-hover>Confirm booking</button>
+      </div>
+    </div>
+
+    <!-- ── step 4 · confirmation ── -->
+    <div class="bk-panel" id="panel4">
+      <div class="bk-confirm">
+        <svg class="bk-confirm__crown" viewBox="0 0 120 90" fill="none" aria-hidden="true">
+          <path d="M12 66h96l-8-42-20 18-20-30-20 30-20-18z" stroke="currentColor" stroke-width="3" stroke-linejoin="round"/>
+          <path d="M14 74h92" stroke="currentColor" stroke-width="3" stroke-linecap="round"/>
+        </svg>
+        <p class="kicker">Your chair is reserved</p>
+        <div class="bk-confirm__ref" id="confRef">KB-0000</div>
+        <p class="bk-confirm__text" id="confText">—</p>
+        <div class="bk-confirm__actions">
+          <button class="btn btn--gold" id="smsBtn" data-hover>Text the shop to confirm</button>
+          <button class="btn btn--ghost" id="icsBtn" data-hover>Add to calendar</button>
+          <button class="btn btn--ghost" id="copyBtn" data-hover>Copy summary</button>
+        </div>
+        <p class="bk-note" id="sendState">Tap “Text the shop” and press send — the shop replies to lock it in.
+        Or call <a href="tel:+46737287393" data-hover>073 – 728 73 93</a>.</p>
+        <a class="bk-again" href="booking.html" data-hover>Make another booking</a>
+      </div>
+    </div>
+
+  </div>
+</section>
+</main>
+
+<!-- ══════════ FOOTER ══════════ -->
+<footer class="footer footer--slim">
+  <div class="footer__row">
+    <span>Kungliga Barbershop · Kungsängsesplanaden 10D · Uppsala</span>
+    <span>Mon–Fri 10–19 · Sat 11–16 · Sun closed</span>
+  </div>
+</footer>
+
+<script src="js/gl.js"></script>
+<script src="js/booking.js"></script>
+</body>
+</html>

@@ -20,6 +20,24 @@ bookings via [Bokadirekt](https://www.bokadirekt.se/places/kungliga-barbershop-5
   deploys anywhere static files are served (GitHub Pages included).
 - Respects `prefers-reduced-motion`, responsive down to mobile, graceful WebGL fallback.
 
+## Direct booking (`booking.html`)
+
+Customers book on the site itself — no third-party account:
+
+1. **Service** — Klippning (60 min), Rakning & skägg (30 min), Kombination (90 min)
+2. **Time** — a 14-day day-strip and slot grid generated from the real opening hours
+   (Mon–Fri 10–19, Sat 11–16, Sun closed), with a 60-minute lead time and
+   conflict detection against existing bookings
+3. **Details** — name + mobile (validated), optional email and notes, live summary
+4. **Done** — booking reference (e.g. `KB-3F9A2`), **Add to calendar** (.ics download),
+   **Text the shop** (prefilled SMS to 073-728 73 93) and copy-summary
+
+Bookings persist in `localStorage`. To connect a real backend, set
+`window.KUNGLIGA_BOOKING_ENDPOINT` (in a small inline script or config file) to any URL
+accepting `POST` JSON `{ ref, service, date, time, duration, name, phone, email, notes }` —
+a serverless function, Formspree form, or Supabase table all work; the SMS handoff remains
+as fallback. The WebGL stage follows the wizard: scissors → comb → razor → crown.
+
 ## Running
 
 No build step. Open `index.html`, or serve statically:
