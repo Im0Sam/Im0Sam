@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Admin — Kungliga Barbershop</title>
+<meta name="robots" content="noindex, nofollow">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%230b0d13'/%3E%3Cpath d='M12 44h40l-3-20-9 8-8-14-8 14-9-8z' fill='%23c9a227'/%3E%3Crect x='12' y='46' width='40' height='5' rx='2.5' fill='%23c9a227'/%3E%3C/svg%3E">
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body data-theme="deep">
+
+<canvas id="gl" class="gl-stage" aria-hidden="true"></canvas>
+<div class="vignette" aria-hidden="true"></div>
+<div class="grain" aria-hidden="true"></div>
+
+<header class="header is-scrolled">
+  <a class="header__brand" href="index.html" data-hover>
+    <svg class="header__crown" viewBox="0 0 64 48" aria-hidden="true">
+      <path d="M6 34h52l-4-22-11 10-11-16-11 16-11-10z" fill="currentColor"/>
+      <rect x="6" y="38" width="52" height="4" rx="2" fill="currentColor"/>
+    </svg>
+    <span>KUNGLIGA</span>
+  </a>
+  <nav class="header__nav" aria-label="Primary">
+    <a href="index.html" data-hover>Website</a>
+    <a href="booking.html" data-hover>Booking page</a>
+  </nav>
+  <button class="header__cta" id="logoutBtn" hidden data-hover>Log out</button>
+</header>
+
+<main id="adminApp">
+
+<!-- ══════════ LOGIN ══════════ -->
+<section class="section adm-login" id="loginView">
+  <div class="adm-login__card glasscard">
+    <svg class="adm-login__crown" viewBox="0 0 120 90" fill="none" aria-hidden="true">
+      <path d="M12 66h96l-8-42-20 18-20-30-20 30-20-18z" stroke="currentColor" stroke-width="3" stroke-linejoin="round"/>
+      <path d="M14 74h92" stroke="currentColor" stroke-width="3" stroke-linecap="round"/>
+    </svg>
+    <p class="kicker">Kungliga — staff only</p>
+    <h1 class="adm-login__title">Admin</h1>
+    <form id="loginForm" novalidate>
+      <label class="bk-field">
+        <span>Password</span>
+        <input type="password" id="loginPass" autocomplete="current-password" placeholder="••••••••••••">
+      </label>
+      <p class="bk-error" id="loginError" role="alert" hidden>Wrong password — try again.</p>
+      <button class="btn btn--gold adm-login__btn" type="submit" data-hover>Log in</button>
+    </form>
+  </div>
+</section>
+
+<!-- ══════════ DASHBOARD ══════════ -->
+<section class="section adm-dash" id="dashView" hidden>
+  <div class="section__inner">
+    <p class="kicker">Private — booked times &amp; availability</p>
+    <h1 class="section__title">Behind the<br><span class="serif-italic">chair</span></h1>
+
+    <div class="stats adm-stats">
+      <div class="stat"><span class="stat__num" id="statToday">0</span><span class="stat__unit"></span><span class="stat__label">bookings today</span></div>
+      <div class="stat"><span class="stat__num" id="statUpcoming">0</span><span class="stat__unit"></span><span class="stat__label">upcoming</span></div>
+      <div class="stat"><span class="stat__num" id="statBlocks">0</span><span class="stat__unit"></span><span class="stat__label">blocked times</span></div>
+    </div>
+
+    <!-- booked times -->
+    <div class="adm-panel">
+      <div class="adm-panel__head">
+        <h2 class="bk-subtitle">Booked times</h2>
+        <div class="adm-filter" role="radiogroup" aria-label="Filter bookings">
+          <button class="adm-chip is-selected" data-filter="upcoming" data-hover>Upcoming</button>
+          <button class="adm-chip" data-filter="all" data-hover>All</button>
+          <button class="adm-chip" data-filter="cancelled" data-hover>Cancelled</button>
+        </div>
+      </div>
+      <div class="adm-list" id="bookingList"></div>
+      <p class="bk-note" id="bookingEmpty" hidden>No bookings here yet — when a customer books on the site, it appears in this list.</p>
+    </div>
+
+    <!-- availability -->
+    <div class="adm-panel">
+      <h2 class="bk-subtitle">Availability — block a time or a whole day</h2>
+      <p class="bk-note">Base hours are Mon–Fri 10:00–19:00, Sat 11:00–16:00, Sun closed.
+      Anything you block here disappears from the customers’ booking page immediately.</p>
+      <form class="adm-block-form" id="blockForm" novalidate>
+        <label class="bk-field">
+          <span>Date</span>
+          <input type="date" id="blkDate" required>
+        </label>
+        <label class="bk-field">
+          <span>From</span>
+          <input type="time" id="blkFrom" value="10:00" step="1800">
+        </label>
+        <label class="bk-field">
+          <span>To</span>
+          <input type="time" id="blkTo" value="19:00" step="1800">
+        </label>
+        <label class="bk-field adm-block-form__reason">
+          <span>Reason <em>(optional)</em></span>
+          <input type="text" id="blkReason" placeholder="Lunch, holiday, private client…">
+        </label>
+        <div class="adm-block-form__actions">
+          <button class="btn btn--gold" type="submit" data-hover>Block time</button>
+          <button class="btn btn--ghost" type="button" id="blockDayBtn" data-hover>Block whole day</button>
+        </div>
+      </form>
+      <p class="bk-error" id="blockError" hidden></p>
+      <div class="adm-list" id="blockList"></div>
+    </div>
+
+    <!-- security -->
+    <div class="adm-panel">
+      <h2 class="bk-subtitle">Security</h2>
+      <form class="adm-pass-form" id="passForm" novalidate>
+        <label class="bk-field">
+          <span>New password</span>
+          <input type="password" id="newPass" autocomplete="new-password" placeholder="At least 8 characters">
+        </label>
+        <button class="btn btn--ghost" type="submit" data-hover>Change password</button>
+      </form>
+      <p class="bk-note" id="passState"></p>
+    </div>
+
+  </div>
+</section>
+</main>
+
+<footer class="footer footer--slim">
+  <div class="footer__row">
+    <span>Kungliga Barbershop · Admin</span>
+    <span><a class="adm-footlink" href="index.html" data-hover>← Back to the website</a></span>
+  </div>
+</footer>
+
+<script src="js/gl.js"></script>
+<script src="js/store.js"></script>
+<script src="js/admin.js"></script>
+</body>
+</html>

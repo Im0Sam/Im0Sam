@@ -32,11 +32,38 @@ Customers book on the site itself — no third-party account:
 4. **Done** — booking reference (e.g. `KB-3F9A2`), **Add to calendar** (.ics download),
    **Text the shop** (prefilled SMS to 073-728 73 93) and copy-summary
 
-Bookings persist in `localStorage`. To connect a real backend, set
-`window.KUNGLIGA_BOOKING_ENDPOINT` (in a small inline script or config file) to any URL
-accepting `POST` JSON `{ ref, service, date, time, duration, name, phone, email, notes }` —
-a serverless function, Formspree form, or Supabase table all work; the SMS handoff remains
-as fallback. The WebGL stage follows the wizard: scissors → comb → razor → crown.
+Booked and admin-blocked times are **removed from the public slot grid entirely** — a
+customer never sees a time that isn't actually free, and the slot is re-checked at the
+moment of confirmation in case it was just taken. The WebGL stage follows the wizard:
+scissors → comb → razor → crown.
+
+## Admin (`admin.html`)
+
+A private staff area behind a login:
+
+- **Login** — password gate (default `kungliga2013` — change it on first login in the
+  Security panel; the password is stored as a salted SHA-256 hash, never in plain text).
+- **Booked times** — every booking with day, time, service, customer name, phone, email
+  and notes, filterable (upcoming / all / cancelled) with Confirm / Cancel / Restore /
+  Delete. Cancelling a booking instantly frees the slot on the public page.
+- **Availability** — block a time range or a whole day (lunch, holiday, private clients);
+  blocked times disappear from the customers' booking page immediately. Unblock restores.
+- **Stats** — bookings today, upcoming, and active blocks at a glance.
+
+## Data layer (`js/store.js`)
+
+All pages share one store. By default it uses `localStorage` (single-browser demo). Two
+hooks make it production-ready without touching page code:
+
+- `window.KUNGLIGA_STORE_DRIVER = { get(key), set(key, value) }` (async) — plug in any
+  shared storage (a serverless KV, Supabase, or a hosted DB) and bookings/blocks become
+  shared across all visitors and devices.
+- `window.KUNGLIGA_BOOKING_ENDPOINT` — optional URL; each new booking is also POSTed
+  there as JSON for notifications/integration.
+
+**Honest limitation:** on a purely static host with no driver configured, data lives in
+each visitor's own browser — the admin sees bookings made on the same device, and the SMS
+handoff carries the booking to the shop. Add a shared driver/backend to make it global.
 
 ## Running
 

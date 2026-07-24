@@ -3,18 +3,17 @@
    service → date & time (from real opening hours) → details →
    confirmation with ICS download + prefilled SMS to the shop.
 
-   Bookings persist in localStorage. To wire a real backend, set
-   window.KUNGLIGA_BOOKING_ENDPOINT to a URL accepting POST JSON
-   { ref, service, date, time, duration, name, phone, email, notes }.
+   All data goes through KStore (js/store.js). Times that are
+   booked — or blocked by the admin in admin.html — simply do not
+   appear in the public slot grid.
    ═══════════════════════════════════════════════════════════════ */
 (function () {
   "use strict";
 
   var app = document.getElementById("bookingApp");
-  if (!app) return;
+  if (!app || !window.KStore) return;
 
   var SHOP_PHONE = "+46737287393";
-  var STORE_KEY = "kungliga-bookings";
   var LEAD_MINUTES = 60;              // earliest bookable slot from "now"
   var SLOT_STEP = 30;                 // grid granularity in minutes
 
@@ -36,39 +35,26 @@
   function niceDate(d) { return DAY_NAMES[d.getDay()] + " " + d.getDate() + " " + MONTHS[d.getMonth()]; }
   function minToHM(m) { return pad(Math.floor(m / 60)) + ":" + pad(m % 60); }
 
-  function loadBookings() {
-    try { return JSON.parse(localStorage.getItem(STORE_KEY)) || []; }
-    catch (e) { return []; }
-  }
-  function saveBooking(b) {
-    var all = loadBookings();
-    all.push(b);
-    try { localStorage.setItem(STORE_KEY, JSON.stringify(all)); } catch (e) {}
-  }
-  function conflicts(dateStr, startMin, dur) {
-    return loadBookings().some(function (b) {
-      if (b.date !== dateStr) return false;
-      var bs = parseInt(b.time.slice(0, 2), 10) * 60 + parseInt(b.time.slice(3), 10);
-      return startMin < bs + b.duration && bs < startMin + dur;
-    });
-  }
-
+  /* free slots for a date — booked/blocked spans are removed entirely */
   function slotsFor(dateStr, dur) {
     var d = new Date(dateStr + "T00:00:00");
     var hours = HOURS[d.getDay()];
-    if (!hours) return [];
-    var open = hours[0] * 60, close = hours[1] * 60;
-    var now = new Date();
-    var minStart = open;
-    if (isoDate(now) === dateStr) {
-      minStart = Math.max(open, now.getHours() * 60 + now.getMinutes() + LEAD_MINUTES);
-      minStart = Math.ceil(minStart / SLOT_STEP) * SLOT_STEP;
-    }
-    var out = [];
-    for (var t = minStart; t + dur <= close; t += SLOT_STEP) {
-      out.push({ min: t, label: minToHM(t), taken: conflicts(dateStr, t, dur) });
-    }
-    return out;
+    if (!hours) return Promise.resolve([]);
+    return KStore.busy(dateStr).then(function (spans) {
+      var open = hours[0] * 60, close = hours[1] * 60;
+      var now = new Date();
+      var minStart = open;
+      if (isoDate(now) === dateStr) {
+        minStart = Math.max(open, now.getHours() * 60 + now.getMinutes() + LEAD_MINUTES);
+        minStart = Math.ceil(minStart / SLOT_STEP) * SLOT_STEP;
+      }
+      var out = [];
+      for (var t = minStart; t + dur <= close; t += SLOT_STEP) {
+        var clash = spans.some(function (s) { return t < s[1] && s[0] < t + dur; });
+        if (!clash) out.push({ min: t, label: minToHM(t) });
+      }
+      return out;
+    });
   }
 
   /* ── step navigation ─────────────────────────────────────── */
@@ -131,32 +117,43 @@
 
   function renderDays() {
     dayStrip.innerHTML = "";
+    slotGrid.innerHTML = "";
+    slotNote.textContent = "Checking free times…";
     var today = new Date();
-    var firstPicked = false;
+    var days = [];
     for (var i = 0; i < 14; i++) {
       var d = new Date(today.getFullYear(), today.getMonth(), today.getDate() + i);
-      var dateStr = isoDate(d);
-      var open = !!HOURS[d.getDay()];
-      var hasSlots = open && slotsFor(dateStr, state.service.dur).some(function (s) { return !s.taken; });
-      var chip = document.createElement("button");
-      chip.type = "button";
-      chip.className = "day-chip" + (hasSlots ? "" : " is-closed");
-      chip.disabled = !hasSlots;
-      chip.setAttribute("role", "radio");
-      chip.setAttribute("data-date", dateStr);
-      chip.setAttribute("data-hover", "");
-      chip.innerHTML =
-        '<span class="day-chip__dow">' + (i === 0 ? "Today" : DAY_NAMES[d.getDay()]) + "</span>" +
-        '<span class="day-chip__num">' + d.getDate() + "</span>" +
-        '<span class="day-chip__mon">' + (open ? MONTHS[d.getMonth()] : "Closed") + "</span>";
-      chip.addEventListener("click", function () { pickDay(this); });
-      dayStrip.appendChild(chip);
-      if (hasSlots && !firstPicked) { firstPicked = true; pickDay(chip); }
+      days.push({ date: d, dateStr: isoDate(d), idx: i });
     }
-    if (!firstPicked) {
-      slotGrid.innerHTML = "";
-      slotNote.textContent = "No free times in the next two weeks — call us and we'll fit you in.";
-    }
+    Promise.all(days.map(function (day) {
+      return slotsFor(day.dateStr, state.service.dur).then(function (slots) {
+        day.free = slots.length;
+        return day;
+      });
+    })).then(function (all) {
+      var firstPicked = false;
+      all.forEach(function (day) {
+        var open = !!HOURS[day.date.getDay()];
+        var hasSlots = day.free > 0;
+        var chip = document.createElement("button");
+        chip.type = "button";
+        chip.className = "day-chip" + (hasSlots ? "" : " is-closed");
+        chip.disabled = !hasSlots;
+        chip.setAttribute("role", "radio");
+        chip.setAttribute("data-date", day.dateStr);
+        chip.setAttribute("data-hover", "");
+        chip.innerHTML =
+          '<span class="day-chip__dow">' + (day.idx === 0 ? "Today" : DAY_NAMES[day.date.getDay()]) + "</span>" +
+          '<span class="day-chip__num">' + day.date.getDate() + "</span>" +
+          '<span class="day-chip__mon">' + (open ? (hasSlots ? MONTHS[day.date.getMonth()] : "Full") : "Closed") + "</span>";
+        chip.addEventListener("click", function () { pickDay(chip); });
+        dayStrip.appendChild(chip);
+        if (hasSlots && !firstPicked) { firstPicked = true; pickDay(chip); }
+      });
+      if (!firstPicked) {
+        slotNote.textContent = "No free times in the next two weeks — call us and we'll fit you in.";
+      }
+    });
   }
 
   function pickDay(chip) {
@@ -174,32 +171,30 @@
 
   function renderSlots() {
     slotGrid.innerHTML = "";
-    var slots = slotsFor(state.date, state.service.dur);
-    var free = 0;
-    slots.forEach(function (s) {
-      var b = document.createElement("button");
-      b.type = "button";
-      b.className = "slot" + (s.taken ? " is-taken" : "");
-      b.disabled = s.taken;
-      b.textContent = s.label;
-      b.setAttribute("role", "radio");
-      b.setAttribute("data-hover", "");
-      if (!s.taken) free++;
-      b.addEventListener("click", function () {
-        Array.prototype.forEach.call(slotGrid.children, function (c) {
-          c.classList.remove("is-selected");
-          c.setAttribute("aria-checked", "false");
+    slotsFor(state.date, state.service.dur).then(function (slots) {
+      slots.forEach(function (s) {
+        var b = document.createElement("button");
+        b.type = "button";
+        b.className = "slot";
+        b.textContent = s.label;
+        b.setAttribute("role", "radio");
+        b.setAttribute("data-hover", "");
+        b.addEventListener("click", function () {
+          Array.prototype.forEach.call(slotGrid.children, function (c) {
+            c.classList.remove("is-selected");
+            c.setAttribute("aria-checked", "false");
+          });
+          b.classList.add("is-selected");
+          b.setAttribute("aria-checked", "true");
+          state.time = s.label;
+          document.getElementById("toStep3").disabled = false;
         });
-        b.classList.add("is-selected");
-        b.setAttribute("aria-checked", "true");
-        state.time = s.label;
-        document.getElementById("toStep3").disabled = false;
+        slotGrid.appendChild(b);
       });
-      slotGrid.appendChild(b);
+      slotNote.textContent = slots.length
+        ? slots.length + " free times · " + state.service.name + " · " + state.service.dur + " min"
+        : "Fully booked this day — try another.";
     });
-    slotNote.textContent = free
-      ? free + " free times · " + state.service.name + " · " + state.service.dur + " min"
-      : "Fully booked this day — try another.";
   }
 
   document.getElementById("toStep3").addEventListener("click", function () {
@@ -221,34 +216,36 @@
     }
     err.hidden = true;
 
-    state.ref = "KB-" + Date.now().toString(36).slice(-5).toUpperCase();
-    var booking = {
-      ref: state.ref,
-      service: state.service.name,
-      date: state.date,
-      time: state.time,
-      duration: state.service.dur,
-      name: name,
-      phone: phone,
-      email: document.getElementById("fEmail").value.trim(),
-      notes: document.getElementById("fNotes").value.trim(),
-      createdAt: new Date().toISOString()
-    };
-    saveBooking(booking);
+    // re-check the slot right before writing, in case it was just taken
+    slotsFor(state.date, state.service.dur).then(function (slots) {
+      var stillFree = slots.some(function (s) { return s.label === state.time; });
+      if (!stillFree) {
+        err.textContent = "That time was just taken — please pick another.";
+        err.hidden = false;
+        goStep(2);
+        renderSlots();
+        return;
+      }
 
-    if (window.KUNGLIGA_BOOKING_ENDPOINT && window.fetch) {
-      fetch(window.KUNGLIGA_BOOKING_ENDPOINT, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(booking)
-      }).then(function () {
-        document.getElementById("sendState").textContent =
-          "Sent to the shop — you'll get a confirmation on " + phone + ".";
-      }).catch(function () { /* SMS handoff remains the fallback */ });
-    }
-
-    showConfirmation(booking);
-    goStep(4);
+      state.ref = "KB-" + Date.now().toString(36).slice(-5).toUpperCase();
+      var booking = {
+        ref: state.ref,
+        service: state.service.name,
+        date: state.date,
+        time: state.time,
+        duration: state.service.dur,
+        name: name,
+        phone: phone,
+        email: document.getElementById("fEmail").value.trim(),
+        notes: document.getElementById("fNotes").value.trim(),
+        createdAt: new Date().toISOString(),
+        status: "new"
+      };
+      KStore.addBooking(booking).then(function () {
+        showConfirmation(booking);
+        goStep(4);
+      });
+    });
   });
 
   /* ── step 4 · confirmation, ICS, SMS, copy ───────────────── */
