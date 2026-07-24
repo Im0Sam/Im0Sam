@@ -1,0 +1,283 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Kungliga Barbershop — Uppsala · Traditional barbering since 2013</title>
+<meta name="description" content="Kungliga Barbershop — first-class men's grooming in Uppsala since 2013. Classic cuts, skin fades, beard trims and straight-razor shaves. Kungsängsesplanaden 10D. Book via Bokadirekt.">
+<meta property="og:title" content="Kungliga Barbershop — Uppsala">
+<meta property="og:description" content="Traditional barbering, modern precision. Since 2013.">
+<meta property="og:type" content="website">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%230b0d13'/%3E%3Cpath d='M12 44h40l-3-20-9 8-8-14-8 14-9-8z' fill='%23c9a227'/%3E%3Crect x='12' y='46' width='40' height='5' rx='2.5' fill='%23c9a227'/%3E%3C/svg%3E">
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body data-theme="hero">
+
+<!-- ══════════ PRELOADER ══════════ -->
+<div class="preloader" id="preloader" aria-hidden="true">
+  <div class="preloader__inner">
+    <svg class="preloader__crown" viewBox="0 0 120 90" fill="none" aria-hidden="true">
+      <path class="crown-path" d="M12 66h96l-8-42-20 18-20-30-20 30-20-18z" stroke="currentColor" stroke-width="3" stroke-linejoin="round"/>
+      <path class="crown-path" d="M14 74h92" stroke="currentColor" stroke-width="3" stroke-linecap="round"/>
+      <circle class="crown-gem" cx="12" cy="22" r="4" stroke="currentColor" stroke-width="2.5"/>
+      <circle class="crown-gem" cx="60" cy="10" r="4" stroke="currentColor" stroke-width="2.5"/>
+      <circle class="crown-gem" cx="108" cy="22" r="4" stroke="currentColor" stroke-width="2.5"/>
+    </svg>
+    <div class="preloader__word" aria-hidden="true">
+      <span>K</span><span>U</span><span>N</span><span>G</span><span>L</span><span>I</span><span>G</span><span>A</span>
+    </div>
+    <div class="preloader__count" id="preloadCount">00</div>
+  </div>
+  <div class="preloader__curtain preloader__curtain--a"></div>
+  <div class="preloader__curtain preloader__curtain--b"></div>
+</div>
+
+<!-- ══════════ FIXED WEBGL STAGE ══════════ -->
+<canvas id="gl" class="gl-stage" aria-hidden="true"></canvas>
+<div class="vignette" aria-hidden="true"></div>
+<div class="grain" aria-hidden="true"></div>
+
+<!-- ══════════ CUSTOM CURSOR ══════════ -->
+<div class="cursor" id="cursorDot" aria-hidden="true"></div>
+<div class="cursor-ring" id="cursorRing" aria-hidden="true"></div>
+
+<!-- ══════════ PROGRESS + SECTION NAV ══════════ -->
+<div class="progress" aria-hidden="true"><div class="progress__bar" id="progressBar"></div></div>
+<nav class="dots" id="dots" aria-label="Section navigation">
+  <a href="#hero"     class="dots__dot is-active" data-label="Kungliga"></a>
+  <a href="#craft"    class="dots__dot" data-label="The Craft"></a>
+  <a href="#shop"     class="dots__dot" data-label="The Shop"></a>
+  <a href="#services" class="dots__dot" data-label="Services"></a>
+  <a href="#gallery"  class="dots__dot" data-label="Atmosphere"></a>
+  <a href="#visit"    class="dots__dot" data-label="Visit"></a>
+</nav>
+
+<!-- ══════════ HEADER ══════════ -->
+<header class="header" id="header">
+  <a class="header__brand" href="#hero" data-hover>
+    <svg class="header__crown" viewBox="0 0 64 48" aria-hidden="true">
+      <path d="M6 34h52l-4-22-11 10-11-16-11 16-11-10z" fill="currentColor"/>
+      <rect x="6" y="38" width="52" height="4" rx="2" fill="currentColor"/>
+    </svg>
+    <span>KUNGLIGA</span>
+  </a>
+  <nav class="header__nav" aria-label="Primary">
+    <a href="#craft" data-hover>The Craft</a>
+    <a href="#shop" data-hover>The Shop</a>
+    <a href="#services" data-hover>Services</a>
+    <a href="#visit" data-hover>Visit</a>
+  </nav>
+  <a class="header__cta" href="https://www.bokadirekt.se/places/kungliga-barbershop-57688" target="_blank" rel="noopener" data-hover>Book a chair</a>
+</header>
+
+<main>
+
+<!-- ══════════ HERO ══════════ -->
+<section class="hero section" id="hero" data-shape="crown" data-theme="hero">
+  <p class="hero__eyebrow reveal">Barbershop · Traditional grooming — Uppsala</p>
+  <h1 class="hero__title" aria-label="Kungliga">
+    <span class="hero__line"><span class="hero__word" data-text="KUNGLIGA">KUNGLIGA</span></span>
+  </h1>
+  <p class="hero__sub reveal">Cuts fit for a king — barbering the royal way since <em>2013</em>.<br>
+  Kungsängsesplanaden 10D · Uppsala</p>
+  <div class="hero__actions reveal">
+    <a class="btn btn--gold" href="https://www.bokadirekt.se/places/kungliga-barbershop-57688" target="_blank" rel="noopener" data-hover>Book a chair</a>
+    <a class="btn btn--ghost" href="#craft" data-hover>Our craft</a>
+  </div>
+  <div class="hero__scroll" aria-hidden="true">
+    <span class="hero__scroll-line"></span>
+    <span>Scroll</span>
+  </div>
+</section>
+
+<!-- ══════════ THE CRAFT ══════════ -->
+<section class="section heritage" id="craft" data-shape="scissors" data-theme="leather">
+  <div class="section__inner">
+    <p class="kicker reveal">Sedan 2013 — The Craft</p>
+    <h2 class="section__title reveal">Sharper than<br><span class="serif-italic">tradition demands</span></h2>
+    <div class="heritage__grid">
+      <div class="heritage__copy reveal">
+        <p>Kungliga has stood for first-class men’s grooming in Uppsala since <strong>2013</strong> —
+        classic barbering built on patience, straight steel and a good conversation. Every visit
+        starts with a consultation and ends only when the mirror agrees.</p>
+        <p>We join <strong>traditional craftsmanship</strong> with modern technique: razor-faded
+        skin fades, scissor work shaped to how your hair actually grows, hot-towel shaves and
+        beard architecture measured to the millimetre.</p>
+      </div>
+      <ul class="timeline">
+        <li class="timeline__item reveal">
+          <span class="timeline__year" data-count="2013">2013</span>
+          <span class="timeline__label">Kungliga opens its chairs in Uppsala</span>
+        </li>
+        <li class="timeline__item reveal">
+          <span class="timeline__year" data-count="2020">2020</span>
+          <span class="timeline__label">A new generation of fades — same straight razor</span>
+        </li>
+        <li class="timeline__item reveal">
+          <span class="timeline__year">Today</span>
+          <span class="timeline__label">Six days a week, one chair at a time</span>
+        </li>
+      </ul>
+    </div>
+    <div class="stats reveal">
+      <div class="stat"><span class="stat__num" data-count="12">12</span><span class="stat__unit">+ years</span><span class="stat__label">behind the chair</span></div>
+      <div class="stat"><span class="stat__num" data-count="6">6</span><span class="stat__unit">days</span><span class="stat__label">open every week</span></div>
+      <div class="stat"><span class="stat__num" data-count="100">100</span><span class="stat__unit">%</span><span class="stat__label">handcrafted, never rushed</span></div>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════ THE SHOP ══════════ -->
+<section class="section hall" id="shop" data-shape="razor" data-theme="steel">
+  <div class="section__inner">
+    <p class="kicker reveal">The Shop</p>
+    <h2 class="section__title reveal">Take a seat<br><span class="serif-italic">on the throne</span></h2>
+    <div class="hall__grid">
+      <p class="hall__lead reveal">Leather chairs, warm towels, sharp steel and better banter.
+      Walk in off Kungsängsesplanaden, hang up your coat, and let the clippers hum —
+      this is a room built for slowing down while the details get done right.</p>
+      <div class="hall__cards">
+        <article class="glasscard reveal" data-tilt>
+          <div class="glasscard__glare"></div>
+          <h3>The Chair</h3>
+          <p>Classic barber chairs and unhurried appointments — your seat is yours for the full session.</p>
+        </article>
+        <article class="glasscard reveal" data-tilt>
+          <div class="glasscard__glare"></div>
+          <h3>The Blade</h3>
+          <p>Straight-razor finishes and hot-towel shaves — the old school, done properly.</p>
+        </article>
+        <article class="glasscard reveal" data-tilt>
+          <div class="glasscard__glare"></div>
+          <h3>The Detail</h3>
+          <p>Skin fades blended to zero, line-ups drawn clean, necklines that survive week three.</p>
+        </article>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════ SERVICES ══════════ -->
+<section class="section menu" id="services" data-shape="comb" data-theme="gold">
+  <div class="section__inner">
+    <p class="kicker reveal">Services</p>
+    <h2 class="section__title reveal">The royal<br><span class="serif-italic">treatment</span></h2>
+    <p class="menu__note reveal">Current prices and times on <a href="https://www.bokadirekt.se/places/kungliga-barbershop-57688" target="_blank" rel="noopener" data-hover>Bokadirekt</a> — or call and we’ll sort you out.</p>
+    <div class="menu__cards">
+      <article class="menucard reveal" data-tilt>
+        <div class="menucard__glare"></div>
+        <header><span class="menucard__tag">Hår · Hair</span><h3>Klippning</h3></header>
+        <ul>
+          <li><span>Consultation first</span><i></i><span class="serif-italic">alltid</span></li>
+          <li><span>Classic scissor cut</span><i></i><span class="serif-italic">sax</span></li>
+          <li><span>Skin fade, blended to zero</span><i></i><span class="serif-italic">fade</span></li>
+          <li><span>Wash &amp; styling</span><i></i><span class="serif-italic">finish</span></li>
+          <li><span>Kids &amp; senior cuts</span><i></i><span class="serif-italic">alla åldrar</span></li>
+        </ul>
+      </article>
+      <article class="menucard menucard--feature reveal" data-tilt>
+        <div class="menucard__glare"></div>
+        <header><span class="menucard__tag">Signatur · The works</span><h3>Kombination</h3></header>
+        <ul>
+          <li><span>Full cut &amp; fade</span><i></i><span class="serif-italic">hår</span></li>
+          <li><span>Beard sculpt &amp; line-up</span><i></i><span class="serif-italic">skägg</span></li>
+          <li><span>Hot-towel razor finish</span><i></i><span class="serif-italic">rakkniv</span></li>
+          <li><span>Black mask / cleanup</span><i></i><span class="serif-italic">detaljer</span></li>
+          <li><span>Style &amp; product advice</span><i></i><span class="serif-italic">på köpet</span></li>
+        </ul>
+      </article>
+      <article class="menucard reveal" data-tilt>
+        <div class="menucard__glare"></div>
+        <header><span class="menucard__tag">Skägg · Beard</span><h3>Rakning</h3></header>
+        <ul>
+          <li><span>Beard trim &amp; shape</span><i></i><span class="serif-italic">trim</span></li>
+          <li><span>Traditional straight shave</span><i></i><span class="serif-italic">rakkniv</span></li>
+          <li><span>Hot towel &amp; oils</span><i></i><span class="serif-italic">varm handduk</span></li>
+          <li><span>Line-up, cheeks &amp; neck</span><i></i><span class="serif-italic">kanter</span></li>
+          <li><span>Beard care advice</span><i></i><span class="serif-italic">vård</span></li>
+        </ul>
+      </article>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════ GALLERY / ATMOSPHERE ══════════ -->
+<section class="section gallery" id="gallery" data-shape="pole" data-theme="pole">
+  <div class="section__inner">
+    <p class="kicker reveal">Atmosphere</p>
+    <h2 class="section__title reveal">Under the<br><span class="serif-italic">barber pole</span></h2>
+  </div>
+  <div class="marquee" aria-hidden="true">
+    <div class="marquee__track">
+      <span>KLIPPNING</span><i>◆</i><span>FADE</span><i>◆</i><span>SKÄGG</span><i>◆</i><span>RAKNING</span><i>◆</i><span>STYLING</span><i>◆</i>
+      <span>KLIPPNING</span><i>◆</i><span>FADE</span><i>◆</i><span>SKÄGG</span><i>◆</i><span>RAKNING</span><i>◆</i><span>STYLING</span><i>◆</i>
+    </div>
+  </div>
+  <div class="gallery__grid section__inner">
+    <figure class="tile tile--pole reveal" data-tilt>
+      <div class="tile__art" aria-hidden="true"></div>
+      <figcaption>The pole is always spinning</figcaption>
+    </figure>
+    <figure class="tile tile--leather reveal" data-tilt>
+      <div class="tile__art" aria-hidden="true"></div>
+      <figcaption>Leather, steel &amp; warm light</figcaption>
+    </figure>
+    <figure class="tile tile--tools reveal" data-tilt>
+      <div class="tile__art" aria-hidden="true"></div>
+      <figcaption>Tools of the trade</figcaption>
+    </figure>
+    <figure class="tile tile--night reveal" data-tilt>
+      <div class="tile__art" aria-hidden="true"></div>
+      <figcaption>Evenings on Kungsängsesplanaden</figcaption>
+    </figure>
+  </div>
+</section>
+
+<!-- ══════════ VISIT ══════════ -->
+<section class="section visit" id="visit" data-shape="mustache" data-theme="deep">
+  <div class="section__inner">
+    <p class="kicker reveal">Visit us</p>
+    <h2 class="section__title reveal">Walk in like<br><span class="serif-italic">royalty</span></h2>
+    <div class="visit__grid">
+      <div class="visit__block reveal">
+        <h3>Hours</h3>
+        <dl class="hours">
+          <div><dt>Mon – Fri</dt><dd>10:00 – 19:00</dd></div>
+          <div><dt>Saturday</dt><dd>11:00 – 16:00</dd></div>
+          <div><dt>Sunday</dt><dd>Closed</dd></div>
+        </dl>
+      </div>
+      <div class="visit__block reveal">
+        <h3>Find us</h3>
+        <address>
+          Kungliga Barbershop<br>
+          Kungsängsesplanaden 10D<br>
+          753 18 Uppsala
+        </address>
+        <p class="visit__hint">Drop-ins welcome when a chair is free — booking guarantees your throne.</p>
+      </div>
+      <div class="visit__block reveal">
+        <h3>Contact</h3>
+        <p><a href="tel:+46737287393" data-hover>073 – 728 73 93</a></p>
+        <p><a href="https://www.instagram.com/kungliga_barbershop/" target="_blank" rel="noopener" data-hover>@kungliga_barbershop</a></p>
+        <a class="btn btn--gold visit__cta" href="https://www.bokadirekt.se/places/kungliga-barbershop-57688" target="_blank" rel="noopener" data-hover>Book on Bokadirekt</a>
+      </div>
+    </div>
+  </div>
+</section>
+
+</main>
+
+<!-- ══════════ FOOTER ══════════ -->
+<footer class="footer">
+  <div class="footer__big" aria-hidden="true">KUNGLIGA</div>
+  <div class="footer__row">
+    <span>Kungliga Barbershop · Kungsängsesplanaden 10D · Uppsala</span>
+    <span>Sedan 2013 · Traditional barbering, modern craft</span>
+  </div>
+</footer>
+
+<script src="js/gl.js"></script>
+<script src="js/main.js"></script>
+</body>
+</html>
